@@ -2,13 +2,9 @@ import os
 from sklearn import linear_model
 from sqlalchemy import create_engine, text
 import boto3
-from time import sleep
+import util
 
 redshift_client = boto3.client('redshift-data', region_name='us-east-1')
-
-def wait_for_query(id):
-    while (redshift_client.describe_statement(Id=id)['Status'] != 'FINISHED'):
-        sleep(0.1)
 
 def get_death_prediction():
     engine = create_engine(os.environ.get("PG_CONNECTION"))
@@ -81,7 +77,7 @@ def get_death_prediction():
         ClusterIdentifier='redshift-cluster-1',
         Sql='SELECT term FROM search_mentions WHERE year = 2016 ORDER BY term asc;'
     )
-    wait_for_query(query_resp['Id'])
+    util.wait_for_redshift_query(redshift_client, query_resp['Id'])
     all_terms_result = redshift_client.get_statement_result(Id=query_resp['Id'])
     term_dict = {}
     for term_row in all_terms_result['Records']:
@@ -95,7 +91,7 @@ def get_death_prediction():
         ClusterIdentifier='redshift-cluster-1',
         Sql='SELECT year, term, number FROM search_mentions WHERE year BETWEEN 2011 AND 2020 OR year = 2023;'
     )
-    wait_for_query(select_query_resp['Id'])
+    util.wait_for_redshift_query(redshift_client, select_query_resp['Id'])
     select_result = redshift_client.get_statement_result(Id=select_query_resp['Id'])
     for row in select_result['Records']:
         if data_dict[row[0]['longValue']][row[1]['stringValue']] == 0:

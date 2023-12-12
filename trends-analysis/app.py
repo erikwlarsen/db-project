@@ -1,15 +1,18 @@
 from flask import Flask, Response, abort, request
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
+import boto3
 import os
 import json
 import regression
+import util
 
 load_dotenv()
 
 app = Flask(__name__)
 
 engine = create_engine(os.environ.get("PG_CONNECTION"))
+redshift_client = boto3.client('redshift-data', region_name='us-east-1')
 
 @app.get("/deaths-prediction")
 def get_prediction():
@@ -55,9 +58,19 @@ def get_search_terms():
     if year is not None:
         query += f"WHERE year = {year} "
     query += "ORDER BY year ASC, number DESC;"
+    query_resp = redshift_client.execute_statement(
+        Database='dev',
+        DbUser='awsuser',
+        ClusterIdentifier='redshift-cluster-1',
+        Sql=query
+    )
+    util.wait_for_redshift_query(redshift_client, query_resp['Id'])
+    all_terms_result = redshift_client.get_statement_result(Id=query_resp['Id'])
     resp = []
-    with engine.connect() as con:
-        rs = con.execute(text(query))
-        for row in rs:
-            resp.append({ "term": row[0], "year": row[1], "number": row[2] })
+    for term_row in all_terms_result['Records']:
+        resp.append({
+            "term": term_row[0]["stringValue"],
+            "year": term_row[1]["longValue"],
+            "number": term_row[2]["longValue"],
+        })
     return Response(json.dumps(resp), mimetype="application/json")
