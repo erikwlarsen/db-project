@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pytrends = "*"
+urllib3 = "==1.26.6"
+sqlalchemy = "*"
+psycopg2 = "*"
+scikit-learn = "*"
+boto3 = "*"
+flask = "*"
+waitress = "*"
+python-dotenv = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
