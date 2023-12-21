@@ -13,9 +13,10 @@ export default function CreateAccount() {
  
     try {
       const formData = new FormData(event.currentTarget);
+      const email = formData.get('email');
       const response = await fetch('/user', {
         method: 'POST',
-        body: JSON.stringify({ email: formData.get('email'), password: formData.get('password') }),
+        body: JSON.stringify({ email, password: formData.get('password') }),
         headers: { 'content-type': 'application/json' },
       });
       if (response.status === 400) {
@@ -24,6 +25,7 @@ export default function CreateAccount() {
       // Handle response if necessary
       const data = await response.json()
       if (data.loggedIn) {
+        localStorage.setItem('email', String(email));
         router.push('/landing');
       }
     } catch (error) {

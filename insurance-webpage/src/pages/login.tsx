@@ -9,14 +9,16 @@ export default function Login() {
   const router = useRouter();
  
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setIsLoading(true) // Set loading to true when the request starts
+    event.preventDefault();
+    setIsLoading(true);
  
     try {
       const formData = new FormData(event.currentTarget);
+      const email = formData.get('email');
+      const password = formData.get('password');
       const response = await fetch('/user', {
         method: 'PUT',
-        body: JSON.stringify({ email: formData.get('email'), password: formData.get('password') }),
+        body: JSON.stringify({ email, password }),
         headers: { 'content-type': 'application/json' },
       });
       if (response.status === 404) {
@@ -29,6 +31,7 @@ export default function Login() {
       // Handle response if necessary
       const data = await response.json()
       if (data.loggedIn) {
+        localStorage.setItem('email', String(email));
         router.push('/landing');
       }
     } catch (error) {
