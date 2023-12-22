@@ -6,3 +6,14 @@ export type PersonalInfo = {
   custSsn: string;
   custSuffix: string;
 };
+
+export type HealthHistory = {
+  relation: string;
+  disease: string;
+  health_history_id: number;
+};
+
+export type Disease = {
+  name: string;
+  cdcCode: string;
+};
