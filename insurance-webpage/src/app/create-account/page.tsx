@@ -1,32 +1,28 @@
+'use client'
+
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, FormEvent } from 'react';
 
-export default function Login() {
+export default function CreateAccount() {
   const [isLoading, setIsLoading] = useState(false);
-  const [showCreateAccount, setShowCreateAccount] = useState(false);
-  const [showWrongPassword, setShowWrongPassword] = useState(false);
+  const [showUserExists, setShowUserExists] = useState(false);
   const router = useRouter();
  
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsLoading(true);
+    event.preventDefault()
+    setIsLoading(true) // Set loading to true when the request starts
  
     try {
       const formData = new FormData(event.currentTarget);
       const email = formData.get('email');
-      const password = formData.get('password');
       const response = await fetch('/user', {
-        method: 'PUT',
-        body: JSON.stringify({ email, password }),
+        method: 'POST',
+        body: JSON.stringify({ email, password: formData.get('password') }),
         headers: { 'content-type': 'application/json' },
       });
-      if (response.status === 404) {
-        setShowWrongPassword(false);
-        setShowCreateAccount(true);
-      } else if (response.status === 401) {
-        setShowCreateAccount(false);
-        setShowWrongPassword(true);
+      if (response.status === 400) {
+        setShowUserExists(true);
       }
       // Handle response if necessary
       const data = await response.json()
@@ -42,7 +38,7 @@ export default function Login() {
     }
   }
   return <main className="flex min-h-screen flex-col items-center justify-between p-24">
-    <h1>Login</h1>
+    <h1>Create an account</h1>
     <form onSubmit={onSubmit}>
       <p>Email</p>
       <input type="text" name="email" />
@@ -51,9 +47,8 @@ export default function Login() {
       <button type="submit" disabled={isLoading}>
         {isLoading ? 'Loading...' : 'Submit'}
       </button>
-      <p hidden={!showCreateAccount}>Account not found. Please create an account by clicking the link below.</p>
-      <p hidden={!showWrongPassword}>Invalid password. Please try again.</p>
-      <p><Link href="/create-account">New here? Create an account to get started.</Link></p>
+      <p hidden={!showUserExists}>There is already an account registered with that email. Please click the link below to log in, or use a different email.</p>
+      <p><Link href="/login">Already have an account? Log in here.</Link></p>
     </form>
   </main>
 };

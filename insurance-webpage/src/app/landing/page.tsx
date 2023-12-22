@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState, useEffect, FormEvent } from 'react';
 import type { HealthHistory, PersonalInfo, Disease, Quote } from '@/app/types';
 import { PersonalInfoDisplay } from '@/app/components/PersonalInfoDisplay';
@@ -156,12 +158,26 @@ export default function Landing() {
         </form>
       )}
       <h2>Family Health History</h2>
-        {healthHistory.map((item) => (
-          <p key={item.health_history_id}>
-            <span><b>Relation: </b>{item.relation}</span>&nbsp;
-            <span><b>Disease: </b>{item.disease}</span>
-          </p>
-        ))}
+        {!healthHistory.length
+        ? <p>Add to your family&apos;s health history below to get started.</p>
+        : (
+          <table>
+            <thead>
+              <tr>
+                <th>Relation</th>
+                <th>Disease</th>
+              </tr>
+            </thead>
+            <tbody>
+            {healthHistory.map((item) => (
+              <tr key={item.health_history_id}>
+                <td>{item.relation === 'aunt_or_uncle' ? 'aunt or uncle' : item.relation}</td>
+                <td>{item.disease}</td>
+              </tr>
+            ))}
+            </tbody>
+          </table>
+        )}
       <h3>Add to health history:</h3>
       <form onSubmit={submitHealthHistory}>
         <p>Relation type:</p>
@@ -185,12 +201,6 @@ export default function Landing() {
         </button>
       </form>
       <h2>Get a quote</h2>
-      
-      {/* Please choose any of the items below that are in your family's health history */}
-      {/* then, calculate estimated 2023 death rates based on those items. Get %
-      of total death rates from those. Then somehow derive a life insurance cost from that.
-      Save quotes and display them in a little list */}
-      {/*  */}
       <form onSubmit={submitQuote}>
         <p>Coverage amount:</p>
         <select required={true} name="coverageAmount">
