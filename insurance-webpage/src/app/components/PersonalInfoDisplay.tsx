@@ -9,7 +9,7 @@ export function PersonalInfoDisplay(props: { info: PersonalInfo }) {
       <p><b>Last name: </b>{info.custLastName}</p>
       <p><b>Suffix: </b>{info.custSuffix}</p>
       <p><b>SSN: </b>{info.custSsn}</p>
-      <p><b>Date of birth: </b>{info.custDob}</p>
+      <p><b>Date of birth: </b>{new Date(info.custDob).toLocaleDateString()}</p>
     </div>
   );
 };

@@ -4,8 +4,8 @@
 
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 100, 50, 220;
-  --background-end-rgb: 255, 255, 255;
+  --background-start-rgb: 235, 225, 197;
+  --background-end-rgb: 189, 174, 134;
 }
 
 @media (prefers-color-scheme: light) {
@@ -24,4 +24,73 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+  padding-left: 20px;
+  padding-bottom: 20px;
+}
+
+h1 {
+  font-size: 40px;
+  padding: 10px;
+  font-weight: 900;
+  text-align: center;
+}
+
+h2 {
+  font-size: 32px;
+  padding: 8px;
+  font-weight: bold;
+}
+
+h3 {
+  font-size: 24px;
+  padding: 8px;
+  font-weight: 600;
+}
+
+th, td {
+  border:1px solid black;
+  padding: 5px 10px;
+  max-width: 600px;
+  overflow-wrap: normal;
+  background-color: rgb(235, 225, 197);
+}
+
+hr {
+  color: black;
+  width: 800px;
+  text-align: center;
+}
+
+select {
+  width: 500px;
+  overflow: clip;
+  padding: 5px;
+}
+
+input {
+  width: 500px;
+  margin: 5px;
+  padding: 5px;
+}
+
+option {
+  padding: 5px;
+  margin: 5px;
+}
+
+button {
+  display: block;
+  background-color: darkslategray !important;
+  color: rgb(235, 225, 197);
+  border: 5px groove black;
+  padding: 5px;
+  margin: 5px;
+}
+
+p {
+  margin: 5px;
+}
+
+a {
+  text-decoration: underline !important;
 }

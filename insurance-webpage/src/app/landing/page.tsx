@@ -15,8 +15,8 @@ export default function Landing() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [quotesLoading, setQuotesLoading] = useState(true);
   const fetchData = async () => {
-    const email = localStorage.getItem('email');
-    const resp = await fetch(`/customer?email=${email}`);
+    const email = localStorage.getItem('email') as string;
+    const resp = await fetch(`/customer?${new URLSearchParams({ email })}`);
     if (resp.status === 404) {
       setInfoFilledOut(false);
       setLoading(false);
@@ -28,8 +28,8 @@ export default function Landing() {
     }
   };
   const fetchFamilyHealthHistory = async () => {
-    const email = localStorage.getItem('email');
-    const resp = await fetch(`/health-history?email=${email}`);
+    const email = localStorage.getItem('email') as string;
+    const resp = await fetch(`/health-history?${new URLSearchParams({ email })}`);
     const data = await resp.json();
     setHealthHistory(data);
     setHhLoading(false);
@@ -41,8 +41,8 @@ export default function Landing() {
     setDiseasesLoading(false);
   };
   const fetchQuotes = async () => {
-    const email = localStorage.getItem('email');
-    const resp = await fetch(`/quote?email=${email}`);
+    const email = localStorage.getItem('email') as string;
+    const resp = await fetch(`/quote?${new URLSearchParams({ email })}`);
     const data = await resp.json();
     setQuotes(data);
     setQuotesLoading(false);
@@ -157,6 +157,7 @@ export default function Landing() {
           </button>
         </form>
       )}
+      <hr></hr>
       <h2>Family Health History</h2>
         {!healthHistory.length
         ? <p>Add to your family&apos;s health history below to get started.</p>
@@ -200,33 +201,37 @@ export default function Landing() {
           {hhLoading ? 'Loading...' : 'Submit'}
         </button>
       </form>
+      <hr></hr>
       <h2>Get a quote</h2>
-      <form onSubmit={submitQuote}>
-        <p>Coverage amount:</p>
-        <select required={true} name="coverageAmount">
-          <option value="100000">$100,000</option>
-          <option value="250000">$250,000</option>
-          <option value="500000">$500,000</option>
-          <option value="750000">$750,000</option>
-          <option value="1000000">$1,000,000</option>
-          <option value="2000000">$2,000,000</option>
-          <option value="5000000">$5,000,000</option>
-          <option value="10000000">$10,000,000</option>
-        </select>
-        <p>Disease:</p>
-        <select required={true} name="policyLength">
-          <option value="10">10 years</option>
-          <option value="15">15 years</option>
-          <option value="20">20 years</option>
-          <option value="25">25 years</option>
-          <option value="30">30 years</option>
-          <option value="35">35 years</option>
-          <option value="40">40 years</option>
-        </select>
-        <button type="submit" disabled={quotesLoading}>
-          {hhLoading ? 'Loading...' : 'Submit'}
-        </button>
-      </form>
+      {!infoFilledOut ? 'Fill out your personal information above to get started.'
+      : (
+        <form onSubmit={submitQuote}>
+          <p>Coverage amount:</p>
+          <select required={true} name="coverageAmount">
+            <option value="100000">$100,000</option>
+            <option value="250000">$250,000</option>
+            <option value="500000">$500,000</option>
+            <option value="750000">$750,000</option>
+            <option value="1000000">$1,000,000</option>
+            <option value="2000000">$2,000,000</option>
+            <option value="5000000">$5,000,000</option>
+            <option value="10000000">$10,000,000</option>
+          </select>
+          <p>Policy length:</p>
+          <select required={true} name="policyLength">
+            <option value="10">10 years</option>
+            <option value="15">15 years</option>
+            <option value="20">20 years</option>
+            <option value="25">25 years</option>
+            <option value="30">30 years</option>
+            <option value="35">35 years</option>
+            <option value="40">40 years</option>
+          </select>
+          <button type="submit" disabled={quotesLoading}>
+            {hhLoading ? 'Loading...' : 'Submit'}
+          </button>
+        </form>
+      )}
       <h3>Past quotes</h3>
       {quotesLoading ? 'Loading...' :
       <table>
@@ -242,9 +247,9 @@ export default function Landing() {
           {quotes.map(q => (
             <tr key={q.quoteId}>
               <td>{new Date(q.createdAt).toLocaleString('en-US')}</td>
-              <td>${q.costPerMonth}</td>
+              <td>${q.costPerMonth.toLocaleString()}</td>
               <td>{q.policyLength} years</td>
-              <td>${q.coverageAmount}</td>
+              <td>${q.coverageAmount.toLocaleString()}</td>
             </tr>
           ))}
         </tbody>
