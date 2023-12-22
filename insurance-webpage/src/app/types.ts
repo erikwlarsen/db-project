@@ -17,3 +17,11 @@ export type Disease = {
   name: string;
   cdcCode: string;
 };
+
+export type Quote = {
+  quoteId: number;
+	costPerMonth: number;
+	policyLength: number;
+	coverageAmount: number;
+	createdAt: string;
+};

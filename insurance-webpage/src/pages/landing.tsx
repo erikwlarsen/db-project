@@ -1,5 +1,5 @@
 import React, { useState, useEffect, FormEvent } from 'react';
-import type { HealthHistory, PersonalInfo, Disease } from '@/app/types';
+import type { HealthHistory, PersonalInfo, Disease, Quote } from '@/app/types';
 import { PersonalInfoDisplay } from '@/app/components/PersonalInfoDisplay';
 
 export default function Landing() {
@@ -10,6 +10,8 @@ export default function Landing() {
   const [healthHistory, setHealthHistory] = useState<HealthHistory[]>([]);
   const [diseases, setDiseases] = useState<Disease[]>([]);
   const [diseasesLoading, setDiseasesLoading] = useState(true);
+  const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [quotesLoading, setQuotesLoading] = useState(true);
   const fetchData = async () => {
     const email = localStorage.getItem('email');
     const resp = await fetch(`/customer?email=${email}`);
@@ -36,10 +38,18 @@ export default function Landing() {
     setDiseases(data);
     setDiseasesLoading(false);
   };
+  const fetchQuotes = async () => {
+    const email = localStorage.getItem('email');
+    const resp = await fetch(`/quote?email=${email}`);
+    const data = await resp.json();
+    setQuotes(data);
+    setQuotesLoading(false);
+  };
   useEffect(() => {
     fetchData();
     fetchFamilyHealthHistory();
     fetchAllDiseases();
+    fetchQuotes();
   }, []);
   const submitPersonalInfo = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -99,6 +109,27 @@ export default function Landing() {
       setHhLoading(false);
     }
   };
+  const submitQuote = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setQuotesLoading(true);
+    const formData = new FormData(event.currentTarget);
+    const email = localStorage.getItem('email');
+    const policyLength = formData.get('policyLength') as string;
+    const coverageAmount = formData.get('coverageAmount') as string;
+    const resp = await fetch('/quote', {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        policyLength: Number(policyLength),
+        coverageAmount: Number(coverageAmount),
+      }),
+      headers: { 'content-type': 'application/json' },
+    });
+    if (resp.ok) {
+      setQuotes(await resp.json());
+      setQuotesLoading(false);
+    }
+  };
   return (
     <div>
       <h1>Larsen Insurance Home Page</h1>
@@ -153,16 +184,61 @@ export default function Landing() {
           {hhLoading ? 'Loading...' : 'Submit'}
         </button>
       </form>
-      {/* this is where they fill out the data that goes in the customer table */}
-      {/* require this data to get a quote */}
-      {/* Maybe they add their family health history here, and can update quotes based on updates to health history */}
       <h2>Get a quote</h2>
-
+      
       {/* Please choose any of the items below that are in your family's health history */}
       {/* then, calculate estimated 2023 death rates based on those items. Get %
       of total death rates from those. Then somehow derive a life insurance cost from that.
       Save quotes and display them in a little list */}
       {/*  */}
+      <form onSubmit={submitQuote}>
+        <p>Coverage amount:</p>
+        <select required={true} name="coverageAmount">
+          <option value="100000">$100,000</option>
+          <option value="250000">$250,000</option>
+          <option value="500000">$500,000</option>
+          <option value="750000">$750,000</option>
+          <option value="1000000">$1,000,000</option>
+          <option value="2000000">$2,000,000</option>
+          <option value="5000000">$5,000,000</option>
+          <option value="10000000">$10,000,000</option>
+        </select>
+        <p>Disease:</p>
+        <select required={true} name="policyLength">
+          <option value="10">10 years</option>
+          <option value="15">15 years</option>
+          <option value="20">20 years</option>
+          <option value="25">25 years</option>
+          <option value="30">30 years</option>
+          <option value="35">35 years</option>
+          <option value="40">40 years</option>
+        </select>
+        <button type="submit" disabled={quotesLoading}>
+          {hhLoading ? 'Loading...' : 'Submit'}
+        </button>
+      </form>
+      <h3>Past quotes</h3>
+      {quotesLoading ? 'Loading...' :
+      <table>
+        <thead>
+          <tr>
+            <th>Date created</th>
+            <th>Cost per month</th>
+            <th>Policy length</th>
+            <th>Coverage amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {quotes.map(q => (
+            <tr key={q.quoteId}>
+              <td>{new Date(q.createdAt).toLocaleString('en-US')}</td>
+              <td>${q.costPerMonth}</td>
+              <td>{q.policyLength} years</td>
+              <td>${q.coverageAmount}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>}
     </div>
   );
 };
